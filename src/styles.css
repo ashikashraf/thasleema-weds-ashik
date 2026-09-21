@@ -549,11 +549,12 @@ body::after {
   }
 
   .hero-floral-right {
-    top: -5rem;
-    right: -7rem;
-    width: 21rem;
-    opacity: .68;
-    --base-rotation: 88deg;
+    top: -3.5rem;
+    right: -6.5rem;
+    width: 19rem;
+    opacity: .72;
+    clip-path: inset(0 0 42% 0);
+    --base-rotation: 0deg;
   }
 }
 
