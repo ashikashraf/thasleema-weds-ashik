@@ -336,9 +336,9 @@ function Quote() {
 }
 
 const gallery = [
-  { src: galleryFlowers, alt: "Ivory roses, jasmine, eucalyptus and gold wedding ribbon", width: 1024, height: 1280 },
-  { src: galleryRings, alt: "Antique gold wedding rings with jasmine and eucalyptus", width: 1280, height: 1024 },
-  { src: galleryTextile, alt: "Sage and ivory bridal fabrics with intricate gold embroidery", width: 1024, height: 1280 },
+  { src: galleryFlowers, alt: "Burgundy and terracotta wedding flowers with antique gold ribbon", width: 1024, height: 1280 },
+  { src: galleryRings, alt: "Antique gold wedding rings surrounded by burgundy blossoms", width: 1280, height: 1024 },
+  { src: galleryTextile, alt: "Deep burgundy bridal fabric with intricate antique gold embroidery", width: 1024, height: 1280 },
 ];
 
 function TiltCard({ image, onClick }: { image: any; onClick: () => void }) {
