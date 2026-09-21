@@ -1,0 +1,11 @@
+{
+  "capabilities": [
+    {"capability":"application code","source":"elysian-bliss-template.zip","outcome":"migrate","status":"verified","next_action":"none"},
+    {"capability":"static image assets","source":"elysian-bliss-template.zip","outcome":"migrate","status":"verified","next_action":"none"},
+    {"capability":"database records","source":"none detected","outcome":"not_applicable","status":"verified","next_action":"none"},
+    {"capability":"authentication","source":"none detected","outcome":"not_applicable","status":"verified","next_action":"none"},
+    {"capability":"external providers","source":"none detected","outcome":"not_applicable","status":"verified","next_action":"none"},
+    {"capability":"public endpoints","source":"none detected","outcome":"not_applicable","status":"verified","next_action":"none"},
+    {"capability":"cutover","source":"local preview","outcome":"preview","status":"verified","next_action":"none"}
+  ]
+}
