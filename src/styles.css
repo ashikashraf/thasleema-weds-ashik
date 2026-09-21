@@ -540,14 +540,21 @@ body::after {
 
 @media (max-width: 767px) {
   .hero-floral-left {
-    display: none;
+    display: block;
+    left: -9rem;
+    bottom: -5rem;
+    width: 20rem;
+    opacity: .48;
+    --base-rotation: -12deg;
   }
 
   .hero-floral-right {
-    top: -7rem;
-    right: -10rem;
-    width: 20rem;
-    opacity: .48;
+    top: -3.5rem;
+    right: -6.5rem;
+    width: 19rem;
+    opacity: .72;
+    clip-path: inset(0 0 42% 0);
+    --base-rotation: 0deg;
   }
 }
 
