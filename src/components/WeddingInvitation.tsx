@@ -175,7 +175,7 @@ function Hero() {
           <a href="#details">View Invitation <ChevronDown /></a>
         </Button>
       </div>
-      <img src={coupleImage} width={896} height={1200} alt="Watercolor illustration of the bride and groom in sage and ivory wedding attire" className="couple-image" />
+      <img src={coupleImage} width={896} height={1200} alt="Bride and groom in traditional wedding attire" className="couple-image" />
     </header>
   );
 }
@@ -208,15 +208,15 @@ function FamilyDetails() {
         <SectionHeading eyebrow="Together with our families">With Joy in Our Hearts</SectionHeading>
         <div className="family-grid reveal-group">
           <article className="reveal-child">
-            <h3>Ashik Ashraf</h3>
-            <p className="relation">S/o Mr. Ashraf.S &amp; Mrs. Sara.V</p>
-            <p>Aisha Manzil, Kanjiraparmbu,<br />Kavilpaad, Olavakkode</p>
+            <h3>Thasleema M</h3>
+            <p className="relation">D/o Mr. Muhammad Musthafa A &amp;<br />Mrs. Nazeerabanu R (Late)</p>
+            <p>Puthankalam (H), Chithali,<br />Kuzhalmannam</p>
           </article>
           <div className="and-mark reveal-child">and</div>
           <article className="reveal-child">
-            <h3>Thasleema M</h3>
-            <p className="relation">D/o Mr. Muhammad musthafa A &amp;<br />Mrs. Nazeerabanu R (Late)</p>
-            <p>Puthankalam (H), Chithali,<br />Kuzhalmannam</p>
+            <h3>Ashik Ashraf</h3>
+            <p className="relation">S/o Mr. Ashraf S &amp; Mrs. Sara V</p>
+            <p>Aisha Manzil, Kanjiraparambu,<br />Kavilpad, Olavakkode</p>
           </article>
         </div>
       </div>
@@ -318,10 +318,7 @@ function VenueMap() {
             <iframe title="Map of Crown Palace, Kuzhalmannam" loading="lazy" src="https://www.google.com/maps?q=Crown%20Palace%20Kuzhalmannam%20Palakkad&output=embed" />
             <div><span>Nikah Venue</span><h3>Crown Palace</h3><p>Kuzhalmannam, Palakkad</p><a href={receptionMaps} target="_blank" rel="noreferrer">Get Directions <MapPin /></a></div>
           </article>
-          <article className="reveal-child">
-            <iframe title="Map of Crown Palace, Kuzhalmannam" loading="lazy" src="https://www.google.com/maps?q=Crown%20Palace%20Kuzhalmannam&output=embed" />
-            <div><span>Nikah</span><h3>Crown Palace</h3><p>Kuzhalmannam</p><a href={nikahMaps} target="_blank" rel="noreferrer">Get Directions <MapPin /></a></div>
-          </article>
+
         </div>
         <CalendarOptions />
       </div>
