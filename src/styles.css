@@ -2022,6 +2022,18 @@ footer time {
   --base-rotation: 91deg;
 }
 
+/* Keep the phone floral detail contained within the upper-right corner. */
+@media (max-width: 767px) {
+  .hero-floral-right {
+    top: -2.75rem;
+    right: -4.25rem;
+    width: 13rem;
+    opacity: .58;
+    clip-path: inset(0 0 18% 0);
+    --base-rotation: 8deg;
+  }
+}
+
 .section-floral-left {
   --base-rotation: -15deg;
 }
