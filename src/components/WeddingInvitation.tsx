@@ -105,7 +105,6 @@ function Navigation() {
     ["Home", "#home"],
     ["Details", "#details"],
     ["Nikah", "#nikah"],
-    ["Ceremony", "#reception"],
     ["RSVP", "#rsvp"],
   ];
 
@@ -233,27 +232,6 @@ function InfoItem({ icon: Icon, title, children }: { icon: typeof CalendarDays; 
   );
 }
 
-function Reception() {
-  return (
-    <section id="reception" className="section reception-section">
-      <div className="section-inner reception-inner">
-        <SectionHeading eyebrow="The sacred union">Nikah Ceremony</SectionHeading>
-        <div className="date-lockup reveal">
-          <span>Saturday</span>
-          <div><i>November</i><strong>28</strong><i>2026</i></div>
-          <p>11:30 AM to 12:00 PM</p>
-        </div>
-        <div className="details-row reveal">
-          <InfoItem icon={CalendarDays} title="Date">28 November 2026</InfoItem>
-          <InfoItem icon={Clock3} title="Time">11:30 AM – 12:00 PM</InfoItem>
-          <InfoItem icon={MapPin} title="Venue">Crown Palace, Kuzhalmannam</InfoItem>
-        </div>
-        <Button asChild size="lg" className="gold-button"><a href={receptionMaps} target="_blank" rel="noreferrer"><MapPin /> Get Directions</a></Button>
-      </div>
-    </section>
-  );
-}
-
 function Nikah() {
   return (
     <section id="nikah" className="section nikah-section">
@@ -266,7 +244,7 @@ function Nikah() {
         <h3>Crown Palace</h3>
         <p>Kuzhalmannam</p>
         <div className="nikah-date"><strong>28</strong><span>November 2026<br />11:30 AM – 12:00 PM</span></div>
-        <Button asChild variant="outline" size="lg"><a href={nikahMaps} target="_blank" rel="noreferrer"><MapPin /> View Location</a></Button>
+        <Button asChild size="lg" className="gold-button"><a href={nikahMaps} target="_blank" rel="noreferrer"><MapPin /> View Location</a></Button>
       </div>
     </section>
   );
@@ -549,7 +527,6 @@ export function WeddingInvitation() {
       <Hero />
       <FamilyDetails />
       <Nikah />
-      <Reception />
       <Timeline />
       <VenueMap />
       <Quote />

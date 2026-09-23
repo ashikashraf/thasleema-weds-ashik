@@ -300,8 +300,8 @@ body::after {
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  background: conic-gradient(var(--gold) var(--scroll-progress, 0%),
-      color-mix(in oklab, var(--gold-soft) 20%, transparent) 0);
+  background: conic-gradient(var(--sage-deep) var(--scroll-progress, 0%),
+      color-mix(in oklab, var(--sage-deep) 20%, transparent) 0);
   z-index: -1;
   padding: 1px;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -541,21 +541,20 @@ body::after {
 @media (max-width: 767px) {
   .hero-floral-left {
     display: block;
-    left: -6rem;
-    bottom: -3rem;
-    width: 16rem;
-    opacity: 0.8;
-    transform: rotate(-25deg);
-    z-index: 3;
+    left: -40rem;
+    bottom: -6rem;
+    width: 12rem;
+    opacity: 0.6;
+    transform: rotate(15deg);
+    z-index: 0;
   }
 
   .hero-floral-right {
-    top: -3.5rem;
-    right: -6.5rem;
-    width: 19rem;
-    opacity: .72;
-    clip-path: inset(0 0 42% 0);
-    --base-rotation: 0deg;
+    top: -5rem;
+    right: -4rem;
+    width: 17rem;
+    opacity: 0.75;
+    transform: rotate(180deg);
   }
 }
 
@@ -594,10 +593,15 @@ body::after {
   text-align: center;
 }
 
-.section-heading h2,
-.nikah-inner h2 {
+.section-heading h2 {
   margin: .4rem 0 0;
   color: var(--sage-deep);
+  font: 400 clamp(3rem, 9vw, 5rem)/1 var(--font-script);
+}
+
+.nikah-inner h2 {
+  margin: .4rem 0 0;
+  color: var(--primary-foreground);
   font: 400 clamp(3rem, 9vw, 5rem)/1 var(--font-script);
 }
 
@@ -656,7 +660,8 @@ body::after {
 }
 
 .nikah-section {
-  background: color-mix(in oklab, var(--sage) 19%, var(--background));
+  color: var(--primary-foreground);
+  background: var(--sage-deep);
 }
 
 .nikah-inner {
@@ -679,7 +684,7 @@ body::after {
 
 .nikah-inner>p:not(.eyebrow) {
   margin: .2rem 0;
-  color: var(--muted-foreground);
+  color: color-mix(in oklab, var(--primary-foreground) 80%, transparent);
 }
 
 .nikah-date {
@@ -1661,21 +1666,22 @@ footer time {
   }
 
   .hero-floral-left {
-    left: -8.5rem;
-    bottom: -2rem;
-    width: 17rem;
-    opacity: .44;
+    left: -7rem;
+    bottom: -6rem;
+    width: 12rem;
+    opacity: 0.6;
     clip-path: none;
-    --base-rotation: -8deg;
+    --base-rotation: 15deg;
+    z-index: 0;
   }
 
   .hero-floral-right {
-    top: -3.5rem;
-    right: -6.5rem;
-    width: 16rem;
-    opacity: .48;
-    clip-path: inset(0 0 30% 0);
-    --base-rotation: 4deg;
+    top: -7rem;
+    right: -7rem;
+    width: 14rem;
+    opacity: 0.65;
+    clip-path: none;
+    --base-rotation: 180deg;
   }
 
   .couple-image {
@@ -2026,12 +2032,12 @@ footer time {
 /* Keep the phone floral detail contained within the upper-right corner. */
 @media (max-width: 767px) {
   .hero-floral-right {
-    top: -2.75rem;
-    right: -4.25rem;
-    width: 13rem;
-    opacity: .58;
-    clip-path: inset(0 0 18% 0);
-    --base-rotation: 8deg;
+    top: -7rem;
+    right: -7rem;
+    width: 14rem;
+    opacity: 0.65;
+    clip-path: none;
+    --base-rotation: 180deg;
   }
 }
 
