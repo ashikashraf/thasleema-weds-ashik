@@ -1678,10 +1678,10 @@ footer time {
   }
 
   .couple-image {
-    right: 50%;
-    bottom: -1rem;
-    width: min(92vw, 25rem);
-    transform: translateX(50%);
+    right: -2.5rem;
+    bottom: -2rem;
+    width: min(88vw, 22rem);
+    transform: none;
   }
 
   .section {
