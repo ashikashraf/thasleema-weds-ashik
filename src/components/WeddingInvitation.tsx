@@ -560,12 +560,12 @@ function RSVP() {
 
       const attendingText = attending === "yes" ? "Joyfully Accepting ✅" : "Unable to Attend ❌";
       const formattedMessage = [
-        `💍 *Wedding RSVP - Thasleema & Ashik* 💍`,
+        `💍 *Wedding RSVP Pass - Thasleema & Ashik* 💍`,
         ``,
-        `👤 *Guest Name:* ${name}`,
-        `✨ *Response:* ${attendingText}`,
-        `👥 *Number of Guests:* ${guests}`,
-        message ? `💬 *Message:* ${message}` : null,
+        `👤 *Honored Guest:* ${name}`,
+        `✨ *RSVP Status:* ${attendingText}`,
+        `👥 *Guests Attending:* ${guests} ${guests > 1 ? "Persons" : "Person"}`,
+        message ? `💬 *Note:* "${message}"` : null,
       ]
         .filter(Boolean)
         .join("\n");
@@ -590,27 +590,7 @@ function RSVP() {
   const handleSharePass = async () => {
     if (!submittedData) return;
 
-    // 1. Mobile Native File Sharing - Shares ONLY the image file into WhatsApp without any link
-    if (submittedData.passImageUrl && typeof navigator !== "undefined" && navigator.canShare) {
-      try {
-        const response = await fetch(submittedData.passImageUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `rsvp-pass-${submittedData.name.replace(/\s+/g, "-")}.png`, {
-          type: "image/png",
-        });
-
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-          });
-          return;
-        }
-      } catch (e) {
-        console.warn("Native file sharing skipped/cancelled", e);
-      }
-    }
-
-    // 2. Desktop Fallback: Copy image to clipboard and trigger instant download
+    // Copy pass image to clipboard & trigger image download
     if (submittedData.passImageUrl) {
       try {
         const response = await fetch(submittedData.passImageUrl);
@@ -622,18 +602,21 @@ function RSVP() {
           setCopiedTip(true);
         }
       } catch (err) {
-        console.warn("Clipboard copy failed", err);
+        console.warn("Clipboard copy notice", err);
       }
 
-      // Download the image file
-      const link = document.createElement("a");
-      link.href = submittedData.passImageUrl;
-      link.download = `rsvp-pass-${submittedData.name.replace(/\s+/g, "-")}.png`;
-      link.click();
+      try {
+        const link = document.createElement("a");
+        link.href = submittedData.passImageUrl;
+        link.download = `rsvp-pass-${submittedData.name.replace(/\s+/g, "-")}.png`;
+        link.click();
+      } catch (e) {
+        console.warn("Auto download notice", e);
+      }
     }
 
-    // Open WhatsApp directly without any web link
-    window.open("https://wa.me/917559007094", "_blank");
+    // Direct WhatsApp navigation to +91 75590 07094 (no system share sheet)
+    window.open(submittedData.whatsappUrl, "_blank");
   };
 
   return (
