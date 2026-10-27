@@ -423,9 +423,6 @@ function RSVP() {
       const whatsappUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(formattedMessage)}`;
 
       setSubmittedData({ name, guests, attending, message, whatsappUrl });
-
-      // Automatically open WhatsApp with the pre-filled response
-      window.open(whatsappUrl, "_blank");
     } catch (err: any) {
       console.error("RSVP submission error:", err);
       setErrorMessage(err?.message || "Something went wrong while sending your RSVP. Please try again.");
@@ -442,12 +439,12 @@ function RSVP() {
         {submittedData ? (
           <div className="rsvp-success animate-scale-in" role="status">
             <Heart className="fill-current text-primary" />
-            <h3>{submittedData.attending === "yes" ? "We can’t wait to celebrate with you" : "You’ll be in our thoughts"}</h3>
-            <p>Thank you for letting us know! Your response has been saved.</p>
+            <h3>{submittedData.attending === "yes" ? "We can’t wait to celebrate with you!" : "You’ll be in our thoughts"}</h3>
+            <p>Thank you, {submittedData.name}! Your RSVP has been received.</p>
 
             <div className="my-5 p-4 rounded-xl border border-primary/30 bg-primary/5 flex flex-col items-center gap-3 text-center">
               <p className="text-sm text-foreground/80">
-                Click below to send this confirmation to <strong>+91 75590 07094</strong> on WhatsApp:
+                You can also share your response with the couple directly on WhatsApp:
               </p>
               <a
                 href={submittedData.whatsappUrl}
@@ -455,7 +452,7 @@ function RSVP() {
                 rel="noopener noreferrer"
                 className="gold-button inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition-transform hover:scale-105 no-underline"
               >
-                <MessageCircle className="h-4 w-4" /> Send Update on WhatsApp
+                <MessageCircle className="h-4 w-4" /> Share on WhatsApp
               </a>
             </div>
 
@@ -620,7 +617,7 @@ export function WeddingInvitation() {
       document.documentElement.style.setProperty("--scroll-y", `${scrollY}px`);
       document.documentElement.style.setProperty("--scroll-progress", `${progress}%`);
     });
-    
+
     return () => {
       observer.disconnect();
       lenis.destroy();
