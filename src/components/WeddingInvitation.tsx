@@ -566,9 +566,6 @@ function RSVP() {
         `✨ *Response:* ${attendingText}`,
         `👥 *Number of Guests:* ${guests}`,
         message ? `💬 *Message:* ${message}` : null,
-        ``,
-        `💌 *Invitation Details & Photos:*`,
-        `https://ashikashraf.github.io/thasleema-weds-ashik/`,
       ]
         .filter(Boolean)
         .join("\n");
@@ -588,9 +585,12 @@ function RSVP() {
     }
   };
 
+  const [copiedTip, setCopiedTip] = useState(false);
+
   const handleSharePass = async () => {
     if (!submittedData) return;
 
+    // 1. Mobile Native File Sharing - Shares ONLY the image file into WhatsApp without any link
     if (submittedData.passImageUrl && typeof navigator !== "undefined" && navigator.canShare) {
       try {
         const response = await fetch(submittedData.passImageUrl);
@@ -602,8 +602,6 @@ function RSVP() {
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
-            title: "Wedding RSVP Pass - Thasleema & Ashik",
-            text: `💍 Wedding RSVP Pass for ${submittedData.name}\nhttps://ashikashraf.github.io/thasleema-weds-ashik/`,
           });
           return;
         }
@@ -612,8 +610,30 @@ function RSVP() {
       }
     }
 
-    // Fallback: open WhatsApp directly with prefilled link and message
-    window.open(submittedData.whatsappUrl, "_blank");
+    // 2. Desktop Fallback: Copy image to clipboard and trigger instant download
+    if (submittedData.passImageUrl) {
+      try {
+        const response = await fetch(submittedData.passImageUrl);
+        const blob = await response.blob();
+        if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ]);
+          setCopiedTip(true);
+        }
+      } catch (err) {
+        console.warn("Clipboard copy failed", err);
+      }
+
+      // Download the image file
+      const link = document.createElement("a");
+      link.href = submittedData.passImageUrl;
+      link.download = `rsvp-pass-${submittedData.name.replace(/\s+/g, "-")}.png`;
+      link.click();
+    }
+
+    // Open WhatsApp directly without any web link
+    window.open("https://wa.me/917559007094", "_blank");
   };
 
   return (
@@ -656,6 +676,12 @@ function RSVP() {
                 </a>
               )}
             </div>
+
+            {copiedTip && (
+              <p className="text-xs text-primary animate-fade-in mt-2 font-medium bg-primary/10 py-1.5 px-3 rounded-full inline-block">
+                ✓ Pass image copied & downloaded! Paste it directly into your WhatsApp chat.
+              </p>
+            )}
 
             <div className="mt-4">
               <Button variant="ghost" size="sm" onClick={() => setSubmittedData(null)}>
