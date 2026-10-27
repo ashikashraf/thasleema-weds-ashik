@@ -314,9 +314,9 @@ function Quote() {
 }
 
 const gallery = [
-  { src: galleryFlowers, alt: "Burgundy and terracotta wedding flowers with antique gold ribbon", width: 1024, height: 1280 },
-  { src: galleryRings, alt: "Antique gold wedding rings surrounded by burgundy blossoms", width: 1280, height: 1024 },
-  { src: galleryTextile, alt: "Deep burgundy bridal fabric with intricate antique gold embroidery", width: 1024, height: 1280 },
+  { src: galleryFlowers, alt: "Burgundy and terracotta wedding flowers with antique gold ribbon", width: 928, height: 1152 },
+  { src: galleryRings, alt: "Antique gold wedding rings surrounded by burgundy blossoms", width: 1152, height: 928 },
+  { src: galleryTextile, alt: "Deep burgundy bridal fabric with intricate antique gold embroidery", width: 928, height: 1152 },
 ];
 
 function TiltCard({ image, onClick }: { image: any; onClick: () => void }) {
