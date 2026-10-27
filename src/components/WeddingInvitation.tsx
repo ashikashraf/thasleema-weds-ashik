@@ -411,10 +411,13 @@ function RSVP() {
       const formattedMessage = [
         `💍 *Wedding RSVP - Thasleema & Ashik* 💍`,
         ``,
-        `👤 *Guest:* ${name}`,
-        `✨ *Attending:* ${attendingText}`,
+        `👤 *Guest Name:* ${name}`,
+        `✨ *Response:* ${attendingText}`,
         `👥 *Number of Guests:* ${guests}`,
         message ? `💬 *Message:* ${message}` : null,
+        ``,
+        `💌 *Invitation Details & Photos:*`,
+        `https://ashikashraf.github.io/thasleema-weds-ashik/`,
       ]
         .filter(Boolean)
         .join("\n");
@@ -440,19 +443,60 @@ function RSVP() {
           <div className="rsvp-success animate-scale-in" role="status">
             <Heart className="fill-current text-primary" />
             <h3>{submittedData.attending === "yes" ? "We can’t wait to celebrate with you!" : "You’ll be in our thoughts"}</h3>
-            <p>Thank you, {submittedData.name}! Your RSVP has been received.</p>
+            <p>Thank you, {submittedData.name}! Your RSVP has been recorded.</p>
 
-            <div className="my-5 p-4 rounded-xl border border-primary/30 bg-primary/5 flex flex-col items-center gap-3 text-center">
-              <p className="text-sm text-foreground/80">
-                You can also share your response with the couple directly on WhatsApp:
+            {/* Visual RSVP Confirmation Card */}
+            <div className="my-6 max-w-sm mx-auto overflow-hidden rounded-2xl border border-primary/30 bg-card/70 shadow-lg text-left backdrop-blur-sm">
+              <div className="relative h-36 w-full overflow-hidden">
+                <img
+                  src={galleryRings}
+                  alt="Thasleema & Ashik Wedding Rings"
+                  className="w-full h-full object-cover brightness-95"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                <div className="absolute bottom-2 left-4 right-4 flex items-center justify-between text-xs font-serif tracking-wider uppercase text-primary">
+                  <span>Wedding RSVP Pass</span>
+                  <span>Thasleema & Ashik</span>
+                </div>
+              </div>
+
+              <div className="p-4 space-y-2 text-sm">
+                <div className="flex justify-between items-center border-b border-border/40 pb-2">
+                  <span className="text-muted-foreground text-xs uppercase tracking-wide">Guest:</span>
+                  <span className="font-semibold text-foreground">{submittedData.name}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-border/40 pb-2">
+                  <span className="text-muted-foreground text-xs uppercase tracking-wide">Status:</span>
+                  <span className={`font-semibold ${submittedData.attending === "yes" ? "text-emerald-500" : "text-amber-500"}`}>
+                    {submittedData.attending === "yes" ? "Joyfully Accepting ✅" : "Unable to Attend ❌"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center border-b border-border/40 pb-2">
+                  <span className="text-muted-foreground text-xs uppercase tracking-wide">Guests Attending:</span>
+                  <span className="font-semibold text-foreground">{submittedData.guests}</span>
+                </div>
+                {submittedData.message && (
+                  <div className="pt-1">
+                    <span className="text-muted-foreground text-xs block mb-1 uppercase tracking-wide">Note:</span>
+                    <p className="italic text-xs text-foreground/90 bg-muted/40 p-2.5 rounded-lg border border-border/30">
+                      "{submittedData.message}"
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="my-4 flex flex-col items-center gap-3 text-center">
+              <p className="text-sm text-foreground/80 max-w-xs">
+                Share this RSVP confirmation card directly with the couple on WhatsApp:
               </p>
               <a
                 href={submittedData.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="gold-button inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition-transform hover:scale-105 no-underline"
+                className="gold-button inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold shadow-md transition-transform hover:scale-105 no-underline"
               >
-                <MessageCircle className="h-4 w-4" /> Share on WhatsApp
+                <MessageCircle className="h-5 w-5" /> Share on WhatsApp
               </a>
             </div>
 
