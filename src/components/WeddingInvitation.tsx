@@ -627,11 +627,6 @@ function RSVP() {
               )}
             </div>
 
-            {copiedTip && (
-              <p className="text-xs text-primary animate-fade-in mt-2 font-medium bg-primary/10 py-1.5 px-3 rounded-full inline-block">
-                ✓ Pass image copied & downloaded! Paste it directly into your WhatsApp chat.
-              </p>
-            )}
 
             <div className="mt-4">
               <Button variant="ghost" size="sm" onClick={() => setSubmittedData(null)}>
