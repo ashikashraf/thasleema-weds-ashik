@@ -12,6 +12,7 @@ import {
   Sparkles,
   X,
   Loader2,
+  MessageCircle,
 } from "lucide-react";
 import Lenis from "lenis";
 
@@ -361,7 +362,13 @@ function Gallery() {
 
 function RSVP() {
   const [attending, setAttending] = useState<"yes" | "no">("yes");
-  const [submitted, setSubmitted] = useState(false);
+  const [submittedData, setSubmittedData] = useState<{
+    name: string;
+    guests: number;
+    attending: "yes" | "no";
+    message?: string;
+    whatsappUrl: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -400,7 +407,25 @@ function RSVP() {
         /* Confirmation still works when storage is unavailable. */
       }
 
-      setSubmitted(true);
+      const attendingText = attending === "yes" ? "Joyfully Accepting ✅" : "Unable to Attend ❌";
+      const formattedMessage = [
+        `💍 *Wedding RSVP - Thasleema & Ashik* 💍`,
+        ``,
+        `👤 *Guest:* ${name}`,
+        `✨ *Attending:* ${attendingText}`,
+        `👥 *Number of Guests:* ${guests}`,
+        message ? `💬 *Message:* ${message}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      const targetNumber = "917559007094";
+      const whatsappUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(formattedMessage)}`;
+
+      setSubmittedData({ name, guests, attending, message, whatsappUrl });
+
+      // Automatically open WhatsApp with the pre-filled response
+      window.open(whatsappUrl, "_blank");
     } catch (err: any) {
       console.error("RSVP submission error:", err);
       setErrorMessage(err?.message || "Something went wrong while sending your RSVP. Please try again.");
@@ -414,12 +439,29 @@ function RSVP() {
       <div className="section-inner narrow">
         <SectionHeading eyebrow="Kindly respond">We Would Love to Celebrate With You</SectionHeading>
         <p className="rsvp-intro">Your presence would make our celebration even more special.</p>
-        {submitted ? (
+        {submittedData ? (
           <div className="rsvp-success animate-scale-in" role="status">
-            <Heart className="fill-current" />
-            <h3>{attending === "yes" ? "We can’t wait to celebrate with you" : "You’ll be in our thoughts"}</h3>
-            <p>Thank you for letting us know.</p>
-            <Button variant="outline" onClick={() => setSubmitted(false)}>Update response</Button>
+            <Heart className="fill-current text-primary" />
+            <h3>{submittedData.attending === "yes" ? "We can’t wait to celebrate with you" : "You’ll be in our thoughts"}</h3>
+            <p>Thank you for letting us know! Your response has been saved.</p>
+
+            <div className="my-5 p-4 rounded-xl border border-primary/30 bg-primary/5 flex flex-col items-center gap-3 text-center">
+              <p className="text-sm text-foreground/80">
+                Click below to send this confirmation to <strong>+91 75590 07094</strong> on WhatsApp:
+              </p>
+              <a
+                href={submittedData.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gold-button inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition-transform hover:scale-105 no-underline"
+              >
+                <MessageCircle className="h-4 w-4" /> Send Update on WhatsApp
+              </a>
+            </div>
+
+            <Button variant="outline" size="sm" onClick={() => setSubmittedData(null)}>
+              Update response
+            </Button>
           </div>
         ) : (
           <form className="rsvp-form reveal" onSubmit={submit}>
