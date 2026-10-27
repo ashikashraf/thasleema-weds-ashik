@@ -11,8 +11,11 @@ import {
   Pause,
   Sparkles,
   X,
+  Loader2,
 } from "lucide-react";
 import Lenis from "lenis";
+
+import { supabase } from "@/lib/supabase";
 
 import coupleImage from "@/assets/wedding-couple.png";
 import floralCorner from "@/assets/floral-corner.png";
@@ -359,26 +362,89 @@ function Gallery() {
 function RSVP() {
   const [attending, setAttending] = useState<"yes" | "no">("yes");
   const [submitted, setSubmitted] = useState(false);
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
-    try { window.localStorage.setItem("thasleema-ashik-rsvp", JSON.stringify({ ...data, attending })); } catch { /* Confirmation still works when storage is unavailable. */ }
-    setSubmitted(true);
+    setLoading(true);
+    setErrorMessage(null);
+
+    const formData = new FormData(event.currentTarget);
+    const name = String(formData.get("name") || "").trim();
+    const guests = parseInt(String(formData.get("guests") || "1"), 10);
+    const message = String(formData.get("message") || "").trim();
+
+    try {
+      if (supabase) {
+        const { error } = await supabase.from("rsvps").insert([
+          {
+            name,
+            guests,
+            attending,
+            message: message || null,
+          },
+        ]);
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw new Error(error.message || "Failed to submit RSVP to the server");
+        }
+      }
+
+      try {
+        window.localStorage.setItem(
+          "thasleema-ashik-rsvp",
+          JSON.stringify({ name, guests, attending, message, submittedAt: new Date().toISOString() })
+        );
+      } catch {
+        /* Confirmation still works when storage is unavailable. */
+      }
+
+      setSubmitted(true);
+    } catch (err: any) {
+      console.error("RSVP submission error:", err);
+      setErrorMessage(err?.message || "Something went wrong while sending your RSVP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <section id="rsvp" className="section rsvp-section">
       <div className="section-inner narrow">
         <SectionHeading eyebrow="Kindly respond">We Would Love to Celebrate With You</SectionHeading>
         <p className="rsvp-intro">Your presence would make our celebration even more special.</p>
         {submitted ? (
-          <div className="rsvp-success animate-scale-in" role="status"><Heart className="fill-current" /><h3>{attending === "yes" ? "We can’t wait to celebrate with you" : "You’ll be in our thoughts"}</h3><p>Thank you for letting us know.</p><Button variant="outline" onClick={() => setSubmitted(false)}>Update response</Button></div>
+          <div className="rsvp-success animate-scale-in" role="status">
+            <Heart className="fill-current" />
+            <h3>{attending === "yes" ? "We can’t wait to celebrate with you" : "You’ll be in our thoughts"}</h3>
+            <p>Thank you for letting us know.</p>
+            <Button variant="outline" onClick={() => setSubmitted(false)}>Update response</Button>
+          </div>
         ) : (
           <form className="rsvp-form reveal" onSubmit={submit}>
-            <label>Guest Name<Input name="name" required maxLength={100} placeholder="Your full name" /></label>
-            <label>Number of Guests<Input name="guests" type="number" required min={1} max={10} defaultValue={1} /></label>
-            <fieldset><legend>Will you be attending?</legend><div className="attending-choice"><button type="button" className={attending === "yes" ? "active" : ""} onClick={() => setAttending("yes")}><Heart /> Joyfully Accepting</button><button type="button" className={attending === "no" ? "active" : ""} onClick={() => setAttending("no")}><X /> Unable to Attend</button></div></fieldset>
-            <label>Message <span>(optional)</span><Textarea name="message" maxLength={500} rows={4} placeholder="Share a note for the couple" /></label>
-            <Button type="submit" size="lg" className="gold-button">Send RSVP <Heart /></Button>
+            {errorMessage && (
+              <div className="p-3 mb-4 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-sm" role="alert">
+                {errorMessage}
+              </div>
+            )}
+            <label>Guest Name<Input name="name" required maxLength={100} placeholder="Your full name" disabled={loading} /></label>
+            <label>Number of Guests<Input name="guests" type="number" required min={1} max={10} defaultValue={1} disabled={loading} /></label>
+            <fieldset>
+              <legend>Will you be attending?</legend>
+              <div className="attending-choice">
+                <button type="button" className={attending === "yes" ? "active" : ""} onClick={() => setAttending("yes")} disabled={loading}><Heart /> Joyfully Accepting</button>
+                <button type="button" className={attending === "no" ? "active" : ""} onClick={() => setAttending("no")} disabled={loading}><X /> Unable to Attend</button>
+              </div>
+            </fieldset>
+            <label>Message <span>(optional)</span><Textarea name="message" maxLength={500} rows={4} placeholder="Share a note for the couple" disabled={loading} /></label>
+            <Button type="submit" size="lg" className="gold-button flex items-center justify-center gap-2" disabled={loading}>
+              {loading ? (
+                <>Sending RSVP... <Loader2 className="animate-spin h-4 w-4" /></>
+              ) : (
+                <>Send RSVP <Heart /></>
+              )}
+            </Button>
           </form>
         )}
       </div>
