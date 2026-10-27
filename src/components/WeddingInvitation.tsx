@@ -13,10 +13,12 @@ import {
   X,
   Loader2,
   MessageCircle,
+  Bell,
 } from "lucide-react";
 import Lenis from "lenis";
 
 import { supabase } from "@/lib/supabase";
+import { HostNotificationModal, sendRsvpPushNotification } from "./HostNotificationModal";
 
 import coupleImage from "@/assets/wedding-couple.png";
 import floralCorner from "@/assets/floral-corner.png";
@@ -576,6 +578,9 @@ function RSVP() {
       // Generate the visual pass image
       const passImageUrl = await generateRsvpPassImage({ name, guests, attending, message });
 
+      // Trigger instant push notification to host mobile
+      void sendRsvpPushNotification({ name, guests, attending, message });
+
       setSubmittedData({ name, guests, attending, message, whatsappUrl, passImageUrl });
     } catch (err: any) {
       console.error("RSVP submission error:", err);
@@ -754,8 +759,24 @@ function MusicPlayer() {
   return <Button size="icon" onClick={toggle} className={`music-button ${playing ? "playing" : ""}`} aria-label={playing ? "Pause ambient music" : "Play ambient music"}>{playing ? <Pause /> : <Music2 />}</Button>;
 }
 
-function Footer() {
-  return <footer><Ornament /><p>Best compliments from</p><h2>Muhammad Ismail</h2><time>28 November 2026</time></footer>;
+function Footer({ onOpenNotifications }: { onOpenNotifications?: () => void }) {
+  return (
+    <footer>
+      <Ornament />
+      <p>Best compliments from</p>
+      <h2>Muhammad Ismail</h2>
+      <time>28 November 2026</time>
+      <div className="mt-8">
+        <button
+          type="button"
+          onClick={onOpenNotifications}
+          className="text-[11px] text-muted-foreground/60 hover:text-primary transition-colors inline-flex items-center gap-1.5 cursor-pointer bg-transparent border-0"
+        >
+          <Bell className="h-3 w-3" /> Host RSVP Notifications
+        </button>
+      </div>
+    </footer>
+  );
 }
 
 function Cursor() {
@@ -863,6 +884,19 @@ export function WeddingInvitation() {
       lenis.destroy();
     };
   }, [opened]);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+
+  useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === "#admin" || window.location.hash === "#notifications") {
+        setShowNotificationModal(true);
+      }
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
+
   const opening = useMemo(() => !opened && <Opening onOpen={handleOpen} isOpening={isOpening} />, [opened, isOpening]);
   return (
     <main className={opened ? "invitation-open" : "invitation-closed"}>
@@ -877,8 +911,17 @@ export function WeddingInvitation() {
       <Quote />
       <Gallery />
       <RSVP />
-      <Footer />
+      <Footer onOpenNotifications={() => setShowNotificationModal(true)} />
       <MusicPlayer />
+      <HostNotificationModal
+        open={showNotificationModal}
+        onClose={() => {
+          setShowNotificationModal(false);
+          if (window.location.hash === "#admin" || window.location.hash === "#notifications") {
+            window.history.replaceState(null, "", window.location.pathname);
+          }
+        }}
+      />
     </main>
   );
 }
