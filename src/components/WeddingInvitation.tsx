@@ -571,7 +571,7 @@ function RSVP() {
         .join("\n");
 
       const targetNumber = "917559007094";
-      const whatsappUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(formattedMessage)}`;
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetNumber}&text=${encodeURIComponent(formattedMessage)}`;
 
       // Generate the visual pass image
       const passImageUrl = await generateRsvpPassImage({ name, guests, attending, message });
@@ -583,40 +583,6 @@ function RSVP() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const [copiedTip, setCopiedTip] = useState(false);
-
-  const handleSharePass = async () => {
-    if (!submittedData) return;
-
-    // Copy pass image to clipboard & trigger image download
-    if (submittedData.passImageUrl) {
-      try {
-        const response = await fetch(submittedData.passImageUrl);
-        const blob = await response.blob();
-        if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
-          await navigator.clipboard.write([
-            new ClipboardItem({ "image/png": blob }),
-          ]);
-          setCopiedTip(true);
-        }
-      } catch (err) {
-        console.warn("Clipboard copy notice", err);
-      }
-
-      try {
-        const link = document.createElement("a");
-        link.href = submittedData.passImageUrl;
-        link.download = `rsvp-pass-${submittedData.name.replace(/\s+/g, "-")}.png`;
-        link.click();
-      } catch (e) {
-        console.warn("Auto download notice", e);
-      }
-    }
-
-    // Direct WhatsApp navigation to +91 75590 07094 (no system share sheet)
-    window.open(submittedData.whatsappUrl, "_blank");
   };
 
   return (
@@ -642,20 +608,21 @@ function RSVP() {
             </div>
 
             <div className="my-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={handleSharePass}
-                className="gold-button inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold shadow-md transition-transform hover:scale-105"
+              <a
+                href={submittedData.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gold-button inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold shadow-md transition-transform hover:scale-105 no-underline"
               >
-                <MessageCircle className="h-5 w-5" /> Share Pass on WhatsApp
-              </button>
+                <MessageCircle className="h-5 w-5" /> Send to WhatsApp (+91 75590 07094)
+              </a>
               {submittedData.passImageUrl && (
                 <a
                   href={submittedData.passImageUrl}
                   download={`rsvp-pass-${submittedData.name.replace(/\s+/g, "-")}.png`}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-sm font-medium border border-border bg-background/80 hover:bg-muted text-foreground transition-colors shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-sm font-medium border border-border bg-background/80 hover:bg-muted text-foreground transition-colors shadow-sm no-underline"
                 >
-                  <Download className="h-4 w-4" /> Download Pass
+                  <Download className="h-4 w-4" /> Download Pass Image
                 </a>
               )}
             </div>
