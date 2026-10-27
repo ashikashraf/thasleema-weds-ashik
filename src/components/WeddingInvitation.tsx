@@ -585,6 +585,65 @@ function RSVP() {
     }
   };
 
+  const [copiedTip, setCopiedTip] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+
+  const handleSharePass = async () => {
+    if (!submittedData?.passImageUrl) return;
+    setIsSharing(true);
+    setCopiedTip(false);
+
+    try {
+      const response = await fetch(submittedData.passImageUrl);
+      const blob = await response.blob();
+      const fileName = `rsvp-pass-${submittedData.name.replace(/\s+/g, "-")}.png`;
+      const file = new File([blob], fileName, { type: "image/png" });
+
+      // 1. Mobile Native File Sharing - shares the actual image file directly to WhatsApp
+      if (typeof navigator !== "undefined" && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: `Wedding RSVP Pass - ${submittedData.name}`,
+          });
+          return;
+        } catch (shareErr: any) {
+          if (shareErr?.name === "AbortError") {
+            return;
+          }
+          console.warn("Native file sharing failed, falling back:", shareErr);
+        }
+      }
+
+      // 2. Desktop fallback: Copy image to clipboard & auto-download image, then open WhatsApp chat
+      if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ]);
+          setCopiedTip(true);
+        } catch (clipErr) {
+          console.warn("Clipboard copy notice:", clipErr);
+        }
+      }
+
+      try {
+        const link = document.createElement("a");
+        link.href = submittedData.passImageUrl;
+        link.download = fileName;
+        link.click();
+      } catch (dlErr) {
+        console.warn("Auto-download notice:", dlErr);
+      }
+
+      window.open(submittedData.whatsappUrl, "_blank");
+    } catch (err) {
+      console.error("Error sharing pass:", err);
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   return (
     <section id="rsvp" className="section rsvp-section">
       <div className="section-inner narrow">
@@ -608,14 +667,15 @@ function RSVP() {
             </div>
 
             <div className="my-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a
-                href={submittedData.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="gold-button inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold shadow-md transition-transform hover:scale-105 no-underline"
+              <button
+                type="button"
+                onClick={handleSharePass}
+                disabled={isSharing}
+                className="gold-button inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold shadow-md transition-transform hover:scale-105 cursor-pointer disabled:opacity-70"
               >
-                <MessageCircle className="h-5 w-5" /> Send to WhatsApp (+91 75590 07094)
-              </a>
+                {isSharing ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
+                Share Pass Image on WhatsApp
+              </button>
               {submittedData.passImageUrl && (
                 <a
                   href={submittedData.passImageUrl}
@@ -626,6 +686,12 @@ function RSVP() {
                 </a>
               )}
             </div>
+
+            {copiedTip && (
+              <p className="text-xs text-primary animate-fade-in mt-2 font-medium bg-primary/10 py-1.5 px-3 rounded-full inline-block">
+                ✓ Pass image copied to clipboard & downloaded! Paste it directly into your WhatsApp chat.
+              </p>
+            )}
 
 
             <div className="mt-4">
