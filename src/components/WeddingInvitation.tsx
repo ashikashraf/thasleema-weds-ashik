@@ -360,6 +360,156 @@ function Gallery() {
   );
 }
 
+async function generateRsvpPassImage(data: {
+  name: string;
+  guests: number;
+  attending: "yes" | "no";
+  message?: string;
+}): Promise<string> {
+  const canvas = document.createElement("canvas");
+  canvas.width = 800;
+  canvas.height = 1000;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
+
+  // 1. Background
+  const gradient = ctx.createLinearGradient(0, 0, 0, 1000);
+  gradient.addColorStop(0, "#2B090F");
+  gradient.addColorStop(0.5, "#1F050A");
+  gradient.addColorStop(1, "#120205");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 800, 1000);
+
+  // 2. Load and Draw Header Rings Image
+  try {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = galleryRings;
+    await new Promise((resolve) => {
+      img.onload = resolve;
+      img.onerror = resolve;
+    });
+
+    if (img.complete && img.naturalWidth > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(36, 36, 728, 380, 16);
+      ctx.clip();
+      ctx.drawImage(img, 36, 36, 728, 380);
+
+      // Vignette blend
+      const imgGrad = ctx.createLinearGradient(0, 260, 0, 416);
+      imgGrad.addColorStop(0, "rgba(31, 5, 10, 0)");
+      imgGrad.addColorStop(1, "rgba(31, 5, 10, 0.95)");
+      ctx.fillStyle = imgGrad;
+      ctx.fillRect(36, 260, 728, 156);
+      ctx.restore();
+    }
+  } catch (e) {
+    console.warn("Canvas image draw notice", e);
+  }
+
+  // 3. Ornate Double Gold Border
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.55)";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(20, 20, 760, 960);
+
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.25)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(28, 28, 744, 944);
+
+  // 4. Header Titles
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#D4AF37";
+  ctx.font = "italic 20px 'Cormorant Garamond', Georgia, serif";
+  ctx.fillText("✦   W E D D I N G   R S V P   P A S S   ✦", 400, 452);
+
+  ctx.fillStyle = "#FFF2D6";
+  ctx.font = "bold 40px 'Cormorant Garamond', Georgia, serif";
+  ctx.fillText("Thasleema & Ashik", 400, 502);
+
+  // Separator
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+  ctx.beginPath();
+  ctx.moveTo(260, 520);
+  ctx.lineTo(540, 520);
+  ctx.stroke();
+
+  // 5. Guest Information Box
+  ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.25)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(50, 545, 700, 290, 16);
+  ctx.fill();
+  ctx.stroke();
+
+  // Field: Guest Name
+  ctx.textAlign = "left";
+  ctx.fillStyle = "rgba(212, 175, 55, 0.9)";
+  ctx.font = "600 13px 'Montserrat', sans-serif";
+  ctx.fillText("HONORED GUEST", 80, 585);
+
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = "bold 28px 'Cormorant Garamond', Georgia, serif";
+  ctx.fillText(data.name, 80, 620);
+
+  // Divider
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+  ctx.beginPath();
+  ctx.moveTo(80, 640);
+  ctx.lineTo(720, 640);
+  ctx.stroke();
+
+  // Columns: Status & Guest Count
+  ctx.fillStyle = "rgba(212, 175, 55, 0.9)";
+  ctx.font = "600 13px 'Montserrat', sans-serif";
+  ctx.fillText("RSVP STATUS", 80, 675);
+  ctx.fillText("GUESTS ATTENDING", 460, 675);
+
+  ctx.font = "bold 20px 'Montserrat', sans-serif";
+  if (data.attending === "yes") {
+    ctx.fillStyle = "#34D399";
+    ctx.fillText("Joyfully Accepting ✓", 80, 710);
+  } else {
+    ctx.fillStyle = "#FBBF24";
+    ctx.fillText("Unable to Attend ✗", 80, 710);
+  }
+
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillText(String(data.guests) + (data.guests > 1 ? " Persons" : " Person"), 460, 710);
+
+  // Message if any
+  if (data.message) {
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.beginPath();
+    ctx.moveTo(80, 735);
+    ctx.lineTo(720, 735);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.font = "italic 16px 'Cormorant Garamond', Georgia, serif";
+    const truncatedMsg = data.message.length > 80 ? data.message.substring(0, 77) + "..." : data.message;
+    ctx.fillText(`“${truncatedMsg}”`, 80, 780);
+  }
+
+  // 6. Footer Venue & Date
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#D4AF37";
+  ctx.font = "600 14px 'Montserrat', sans-serif";
+  ctx.fillText("SATURDAY, 28 NOVEMBER 2026", 400, 885);
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+  ctx.font = "14px 'Montserrat', sans-serif";
+  ctx.fillText("Crown Palace, Kuzhalmannam, Palakkad", 400, 915);
+
+  ctx.fillStyle = "rgba(212, 175, 55, 0.5)";
+  ctx.font = "11px 'Montserrat', sans-serif";
+  ctx.fillText("thasleema-weds-ashik", 400, 945);
+
+  return canvas.toDataURL("image/png");
+}
+
 function RSVP() {
   const [attending, setAttending] = useState<"yes" | "no">("yes");
   const [submittedData, setSubmittedData] = useState<{
@@ -368,6 +518,7 @@ function RSVP() {
     attending: "yes" | "no";
     message?: string;
     whatsappUrl: string;
+    passImageUrl?: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -425,13 +576,44 @@ function RSVP() {
       const targetNumber = "917559007094";
       const whatsappUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(formattedMessage)}`;
 
-      setSubmittedData({ name, guests, attending, message, whatsappUrl });
+      // Generate the visual pass image
+      const passImageUrl = await generateRsvpPassImage({ name, guests, attending, message });
+
+      setSubmittedData({ name, guests, attending, message, whatsappUrl, passImageUrl });
     } catch (err: any) {
       console.error("RSVP submission error:", err);
       setErrorMessage(err?.message || "Something went wrong while sending your RSVP. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSharePass = async () => {
+    if (!submittedData) return;
+
+    if (submittedData.passImageUrl && typeof navigator !== "undefined" && navigator.canShare) {
+      try {
+        const response = await fetch(submittedData.passImageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `rsvp-pass-${submittedData.name.replace(/\s+/g, "-")}.png`, {
+          type: "image/png",
+        });
+
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "Wedding RSVP Pass - Thasleema & Ashik",
+            text: `💍 Wedding RSVP Pass for ${submittedData.name}\nhttps://ashikashraf.github.io/thasleema-weds-ashik/`,
+          });
+          return;
+        }
+      } catch (e) {
+        console.warn("Native file sharing skipped/cancelled", e);
+      }
+    }
+
+    // Fallback: open WhatsApp directly with prefilled link and message
+    window.open(submittedData.whatsappUrl, "_blank");
   };
 
   return (
@@ -443,66 +625,43 @@ function RSVP() {
           <div className="rsvp-success animate-scale-in" role="status">
             <Heart className="fill-current text-primary" />
             <h3>{submittedData.attending === "yes" ? "We can’t wait to celebrate with you!" : "You’ll be in our thoughts"}</h3>
-            <p>Thank you, {submittedData.name}! Your RSVP has been recorded.</p>
+            <p>Thank you, {submittedData.name}! Here is your official wedding RSVP pass:</p>
 
-            {/* Visual RSVP Confirmation Card */}
-            <div className="my-6 max-w-sm mx-auto overflow-hidden rounded-2xl border border-primary/30 bg-card/70 shadow-lg text-left backdrop-blur-sm">
-              <div className="relative h-36 w-full overflow-hidden">
+            {/* Generated Visual RSVP Pass Image */}
+            <div className="my-6 max-w-sm mx-auto overflow-hidden rounded-2xl border border-primary/30 shadow-2xl transition-transform hover:scale-[1.01]">
+              {submittedData.passImageUrl ? (
                 <img
-                  src={galleryRings}
-                  alt="Thasleema & Ashik Wedding Rings"
-                  className="w-full h-full object-cover brightness-95"
+                  src={submittedData.passImageUrl}
+                  alt={`Wedding RSVP Pass for ${submittedData.name}`}
+                  className="w-full h-auto block rounded-2xl"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                <div className="absolute bottom-2 left-4 right-4 flex items-center justify-between text-xs font-serif tracking-wider uppercase text-primary">
-                  <span>Wedding RSVP Pass</span>
-                  <span>Thasleema & Ashik</span>
-                </div>
-              </div>
-
-              <div className="p-4 space-y-2 text-sm">
-                <div className="flex justify-between items-center border-b border-border/40 pb-2">
-                  <span className="text-muted-foreground text-xs uppercase tracking-wide">Guest:</span>
-                  <span className="font-semibold text-foreground">{submittedData.name}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-border/40 pb-2">
-                  <span className="text-muted-foreground text-xs uppercase tracking-wide">Status:</span>
-                  <span className={`font-semibold ${submittedData.attending === "yes" ? "text-emerald-500" : "text-amber-500"}`}>
-                    {submittedData.attending === "yes" ? "Joyfully Accepting ✅" : "Unable to Attend ❌"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center border-b border-border/40 pb-2">
-                  <span className="text-muted-foreground text-xs uppercase tracking-wide">Guests Attending:</span>
-                  <span className="font-semibold text-foreground">{submittedData.guests}</span>
-                </div>
-                {submittedData.message && (
-                  <div className="pt-1">
-                    <span className="text-muted-foreground text-xs block mb-1 uppercase tracking-wide">Note:</span>
-                    <p className="italic text-xs text-foreground/90 bg-muted/40 p-2.5 rounded-lg border border-border/30">
-                      "{submittedData.message}"
-                    </p>
-                  </div>
-                )}
-              </div>
+              ) : null}
             </div>
 
-            <div className="my-4 flex flex-col items-center gap-3 text-center">
-              <p className="text-sm text-foreground/80 max-w-xs">
-                Share this RSVP confirmation card directly with the couple on WhatsApp:
-              </p>
-              <a
-                href={submittedData.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="gold-button inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold shadow-md transition-transform hover:scale-105 no-underline"
+            <div className="my-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={handleSharePass}
+                className="gold-button inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold shadow-md transition-transform hover:scale-105"
               >
-                <MessageCircle className="h-5 w-5" /> Share on WhatsApp
-              </a>
+                <MessageCircle className="h-5 w-5" /> Share Pass on WhatsApp
+              </button>
+              {submittedData.passImageUrl && (
+                <a
+                  href={submittedData.passImageUrl}
+                  download={`rsvp-pass-${submittedData.name.replace(/\s+/g, "-")}.png`}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-sm font-medium border border-border bg-background/80 hover:bg-muted text-foreground transition-colors shadow-sm"
+                >
+                  <Download className="h-4 w-4" /> Download Pass
+                </a>
+              )}
             </div>
 
-            <Button variant="outline" size="sm" onClick={() => setSubmittedData(null)}>
-              Update response
-            </Button>
+            <div className="mt-4">
+              <Button variant="ghost" size="sm" onClick={() => setSubmittedData(null)}>
+                Update response
+              </Button>
+            </div>
           </div>
         ) : (
           <form className="rsvp-form reveal" onSubmit={submit}>
