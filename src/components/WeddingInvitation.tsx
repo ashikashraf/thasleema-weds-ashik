@@ -369,20 +369,93 @@ async function generateRsvpPassImage(data: {
   message?: string;
 }): Promise<string> {
   const canvas = document.createElement("canvas");
-  canvas.width = 800;
-  canvas.height = 1000;
+  const W = 840;
+  const H = 1180;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext("2d");
   if (!ctx) return "";
 
-  // 1. Background
-  const gradient = ctx.createLinearGradient(0, 0, 0, 1000);
-  gradient.addColorStop(0, "#2B090F");
-  gradient.addColorStop(0.5, "#1F050A");
-  gradient.addColorStop(1, "#120205");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 800, 1000);
+  // Wait for fonts if document.fonts is available
+  if (typeof document !== "undefined" && document.fonts?.ready) {
+    try {
+      await document.fonts.ready;
+    } catch {
+      /* ignore */
+    }
+  }
 
-  // 2. Load and Draw Header Rings Image
+  // Helper for drawing rounded rectangles with radius
+  const drawRoundRect = (
+    c: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number
+  ) => {
+    c.beginPath();
+    c.roundRect(x, y, w, h, r);
+  };
+
+  // Helper for shimmering gold foil linear gradient
+  const createGoldGradient = (x0: number, y0: number, x1: number, y1: number) => {
+    const g = ctx.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, "#FBF0B9");
+    g.addColorStop(0.25, "#E2C36B");
+    g.addColorStop(0.5, "#CA9F3B");
+    g.addColorStop(0.75, "#F7E6A8");
+    g.addColorStop(1, "#A87A1E");
+    return g;
+  };
+
+  // 1. Rich Royal Velvet Burgundy Background
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, "#240409");
+  bgGrad.addColorStop(0.4, "#190206");
+  bgGrad.addColorStop(0.8, "#130104");
+  bgGrad.addColorStop(1, "#0A0002");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Soft warm central glow for a dreamy atmospheric feel
+  const radialGlow = ctx.createRadialGradient(W / 2, 480, 50, W / 2, 480, 480);
+  radialGlow.addColorStop(0, "rgba(92, 18, 30, 0.45)");
+  radialGlow.addColorStop(1, "rgba(92, 18, 30, 0)");
+  ctx.fillStyle = radialGlow;
+  ctx.fillRect(0, 0, W, H);
+
+  // 2. Ornate Double Gold Framing with Corner Flourishes
+  ctx.save();
+  ctx.strokeStyle = "rgba(218, 179, 87, 0.55)";
+  ctx.lineWidth = 1.8;
+  drawRoundRect(ctx, 22, 22, W - 44, H - 44, 24);
+  ctx.stroke();
+
+  // Inset Fine Hairline Border
+  ctx.strokeStyle = "rgba(218, 179, 87, 0.25)";
+  ctx.lineWidth = 0.8;
+  drawRoundRect(ctx, 30, 30, W - 60, H - 60, 20);
+  ctx.stroke();
+
+  // Corner Star Accents
+  ctx.fillStyle = "#E2C36B";
+  ctx.font = "14px 'Montserrat', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("✦", 44, 44);
+  ctx.fillText("✦", W - 44, 44);
+  ctx.fillText("✦", 44, H - 44);
+  ctx.fillText("✦", W - 44, H - 44);
+  ctx.restore();
+
+  // 3. Hero Photo with Regal Arch & Aspect Ratio Preserved (COVER FIT - ZERO STRETCH!)
+  const photoX = 52;
+  const photoY = 52;
+  const photoW = W - 104; // 736
+  const photoH = 340;
+  const photoRadius = 18;
+
   try {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -394,120 +467,260 @@ async function generateRsvpPassImage(data: {
 
     if (img.complete && img.naturalWidth > 0) {
       ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(36, 36, 728, 380, 16);
+      // Clip to rounded container
+      drawRoundRect(ctx, photoX, photoY, photoW, photoH, photoRadius);
       ctx.clip();
-      ctx.drawImage(img, 36, 36, 728, 380);
 
-      // Vignette blend
-      const imgGrad = ctx.createLinearGradient(0, 260, 0, 416);
-      imgGrad.addColorStop(0, "rgba(31, 5, 10, 0)");
-      imgGrad.addColorStop(1, "rgba(31, 5, 10, 0.95)");
-      ctx.fillStyle = imgGrad;
-      ctx.fillRect(36, 260, 728, 156);
+      // Proportional Cover Calculation (prevents stretching and distortion)
+      const imgRatio = img.naturalWidth / img.naturalHeight;
+      const boxRatio = photoW / photoH;
+      let sX = 0, sY = 0, sW = img.naturalWidth, sH = img.naturalHeight;
+      if (imgRatio > boxRatio) {
+        sW = img.naturalHeight * boxRatio;
+        sX = (img.naturalWidth - sW) / 2;
+      } else {
+        sH = img.naturalWidth / boxRatio;
+        sY = (img.naturalHeight - sH) / 2;
+      }
+      ctx.drawImage(img, sX, sY, sW, sH, photoX, photoY, photoW, photoH);
+
+      // Luxurious soft dark-burgundy fade at bottom of photo
+      const imgVignette = ctx.createLinearGradient(0, photoY + photoH * 0.45, 0, photoY + photoH);
+      imgVignette.addColorStop(0, "rgba(25, 2, 6, 0)");
+      imgVignette.addColorStop(0.65, "rgba(25, 2, 6, 0.7)");
+      imgVignette.addColorStop(1, "rgba(25, 2, 6, 0.98)");
+      ctx.fillStyle = imgVignette;
+      ctx.fillRect(photoX, photoY + photoH * 0.4, photoW, photoH * 0.6);
+
+      // Gold inner photo border
+      ctx.strokeStyle = "rgba(218, 179, 87, 0.4)";
+      ctx.lineWidth = 1.2;
+      drawRoundRect(ctx, photoX, photoY, photoW, photoH, photoRadius);
+      ctx.stroke();
+
       ctx.restore();
     }
   } catch (e) {
     console.warn("Canvas image draw notice", e);
   }
 
-  // 3. Ornate Double Gold Border
-  ctx.strokeStyle = "rgba(212, 175, 55, 0.55)";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(20, 20, 760, 960);
-
-  ctx.strokeStyle = "rgba(212, 175, 55, 0.25)";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(28, 28, 744, 944);
-
-  // 4. Header Titles
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#D4AF37";
-  ctx.font = "italic 20px 'Cormorant Garamond', Georgia, serif";
-  ctx.fillText("✦   W E D D I N G   R S V P   P A S S   ✦", 400, 452);
-
-  ctx.fillStyle = "#FFF2D6";
-  ctx.font = "bold 40px 'Cormorant Garamond', Georgia, serif";
-  ctx.fillText("Thasleema & Ashik", 400, 502);
-
-  // Separator
-  ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+  // 4. Monogram Wax Seal Emblem (Centered overlapping photo bottom)
+  const sealY = photoY + photoH; // 392
+  ctx.save();
+  const sealGrad = ctx.createRadialGradient(W / 2, sealY, 6, W / 2, sealY, 34);
+  sealGrad.addColorStop(0, "#2D060F");
+  sealGrad.addColorStop(0.8, "#180206");
+  sealGrad.addColorStop(1, "#0F0103");
+  ctx.fillStyle = sealGrad;
   ctx.beginPath();
-  ctx.moveTo(260, 520);
-  ctx.lineTo(540, 520);
+  ctx.arc(W / 2, sealY, 32, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = createGoldGradient(W / 2 - 32, sealY - 32, W / 2 + 32, sealY + 32);
+  ctx.lineWidth = 2;
   ctx.stroke();
 
-  // 5. Guest Information Box
-  ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
-  ctx.strokeStyle = "rgba(212, 175, 55, 0.25)";
+  // Inset dotted circle
+  ctx.strokeStyle = "rgba(218, 179, 87, 0.6)";
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.arc(W / 2, sealY, 26, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Monogram letters
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#F7E6A8";
+  ctx.font = "italic 600 17px 'Cormorant Garamond', Georgia, serif";
+  ctx.fillText("T ♥ A", W / 2, sealY);
+  ctx.restore();
+
+  // 5. Header Titles (Pinterest Typographic Hierarchy)
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+
+  // Eyebrow
+  ctx.fillStyle = "#D4AF37";
+  ctx.font = "600 12px 'Montserrat', sans-serif";
+  ctx.fillText("✦   O F F I C I A L   W E D D I N G   P A S S   ✦", W / 2, 452);
+
+  // Couple Names in Radiant Gold
+  ctx.fillStyle = createGoldGradient(W / 2 - 200, 480, W / 2 + 200, 508);
+  ctx.font = "bold 44px 'Cormorant Garamond', Georgia, serif";
+  ctx.fillText("Thasleema & Ashik", W / 2, 506);
+
+  // Subtitle
+  ctx.fillStyle = "rgba(255, 248, 235, 0.7)";
+  ctx.font = "italic 16px 'Cormorant Garamond', Georgia, serif";
+  ctx.fillText("cordially invite you to celebrate their Nikah", W / 2, 532);
+
+  // Delicate Ornamental Divider with Center Diamond
+  ctx.strokeStyle = "rgba(218, 179, 87, 0.35)";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.roundRect(50, 545, 700, 290, 16);
+  ctx.moveTo(W / 2 - 140, 548);
+  ctx.lineTo(W / 2 - 16, 548);
+  ctx.moveTo(W / 2 + 16, 548);
+  ctx.lineTo(W / 2 + 140, 548);
+  ctx.stroke();
+
+  ctx.fillStyle = "#E2C36B";
+  ctx.font = "11px 'Montserrat', sans-serif";
+  ctx.fillText("◆", W / 2, 552);
+
+  // 6. Honored Guest VIP Card (Glassmorphic Container)
+  const cardX = 52;
+  const cardY = 568;
+  const cardW = W - 104; // 736
+  const cardH = 154;
+
+  ctx.save();
+  // Glass background
+  ctx.fillStyle = "rgba(255, 255, 255, 0.035)";
+  drawRoundRect(ctx, cardX, cardY, cardW, cardH, 18);
+  ctx.fill();
+
+  // Elegant gold border
+  ctx.strokeStyle = "rgba(218, 179, 87, 0.3)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Small VIP Ribbon Tag
+  ctx.fillStyle = "rgba(218, 179, 87, 0.14)";
+  drawRoundRect(ctx, cardX + 24, cardY + 16, 134, 22, 11);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(218, 179, 87, 0.4)";
+  ctx.stroke();
+
+  ctx.fillStyle = "#E2C36B";
+  ctx.font = "bold 10px 'Montserrat', sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("★ HONORED GUEST", cardX + 34, cardY + 31);
+
+  // Guest Name in large serif
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = "bold 32px 'Cormorant Garamond', Georgia, serif";
+  const displayName = data.name.length > 28 ? data.name.substring(0, 26) + "..." : data.name;
+  ctx.fillText(displayName, cardX + 24, cardY + 76);
+
+  // Badges: RSVP Status & Guest Count
+  const badgeY = cardY + 100;
+
+  // Status Badge Pill
+  const isYes = data.attending === "yes";
+  ctx.fillStyle = isYes ? "rgba(52, 211, 153, 0.12)" : "rgba(244, 63, 94, 0.12)";
+  drawRoundRect(ctx, cardX + 24, badgeY, 196, 32, 16);
+  ctx.fill();
+  ctx.strokeStyle = isYes ? "rgba(52, 211, 153, 0.45)" : "rgba(244, 63, 94, 0.45)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = isYes ? "#34D399" : "#FB7185";
+  ctx.font = "bold 12px 'Montserrat', sans-serif";
+  ctx.fillText(isYes ? "✓ Joyfully Accepting" : "✗ Regretfully Declined", cardX + 42, badgeY + 21);
+
+  // Seats Reserved Pill
+  ctx.fillStyle = "rgba(218, 179, 87, 0.1)";
+  drawRoundRect(ctx, cardX + 232, badgeY, 184, 32, 16);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(218, 179, 87, 0.4)";
+  ctx.stroke();
+
+  ctx.fillStyle = "#F5EBE1";
+  ctx.font = "600 12px 'Montserrat', sans-serif";
+  const seatText = `${data.guests} ${data.guests > 1 ? "Seats Reserved" : "Seat Reserved"}`;
+  ctx.fillText(`●  ${seatText}`, cardX + 250, badgeY + 21);
+
+  // Optional Note Quote
+  if (data.message) {
+    ctx.textAlign = "right";
+    ctx.fillStyle = "rgba(255, 248, 235, 0.65)";
+    ctx.font = "italic 14px 'Cormorant Garamond', Georgia, serif";
+    const note = data.message.length > 40 ? data.message.substring(0, 37) + "..." : data.message;
+    ctx.fillText(`“${note}”`, cardX + cardW - 24, cardY + 74);
+  }
+  ctx.restore();
+
+  // 7. Pinterest Ticket Cutouts & Perforation Line
+  const notchY = 745;
+  const notchR = 20;
+
+  ctx.save();
+  ctx.fillStyle = "#0A0002"; // Match background outer edge
+  ctx.beginPath();
+  ctx.arc(0, notchY, notchR, -Math.PI / 2, Math.PI / 2);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(218, 179, 87, 0.5)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(W, notchY, notchR, Math.PI / 2, (3 * Math.PI) / 2);
   ctx.fill();
   ctx.stroke();
 
-  // Field: Guest Name
-  ctx.textAlign = "left";
-  ctx.fillStyle = "rgba(212, 175, 55, 0.9)";
-  ctx.font = "600 13px 'Montserrat', sans-serif";
-  ctx.fillText("HONORED GUEST", 80, 585);
-
-  ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 28px 'Cormorant Garamond', Georgia, serif";
-  ctx.fillText(data.name, 80, 620);
-
-  // Divider
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+  // Perforation dashed gold line across ticket
+  ctx.strokeStyle = "rgba(218, 179, 87, 0.4)";
+  ctx.lineWidth = 1.2;
+  ctx.setLineDash([7, 8]);
   ctx.beginPath();
-  ctx.moveTo(80, 640);
-  ctx.lineTo(720, 640);
+  ctx.moveTo(notchR + 10, notchY);
+  ctx.lineTo(W - notchR - 10, notchY);
   ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
 
-  // Columns: Status & Guest Count
-  ctx.fillStyle = "rgba(212, 175, 55, 0.9)";
-  ctx.font = "600 13px 'Montserrat', sans-serif";
-  ctx.fillText("RSVP STATUS", 80, 675);
-  ctx.fillText("GUESTS ATTENDING", 460, 675);
-
-  ctx.font = "bold 20px 'Montserrat', sans-serif";
-  if (data.attending === "yes") {
-    ctx.fillStyle = "#34D399";
-    ctx.fillText("Joyfully Accepting ✓", 80, 710);
-  } else {
-    ctx.fillStyle = "#FBBF24";
-    ctx.fillText("Unable to Attend ✗", 80, 710);
-  }
-
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(String(data.guests) + (data.guests > 1 ? " Persons" : " Person"), 460, 710);
-
-  // Message if any
-  if (data.message) {
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
-    ctx.beginPath();
-    ctx.moveTo(80, 735);
-    ctx.lineTo(720, 735);
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-    ctx.font = "italic 16px 'Cormorant Garamond', Georgia, serif";
-    const truncatedMsg = data.message.length > 80 ? data.message.substring(0, 77) + "..." : data.message;
-    ctx.fillText(`“${truncatedMsg}”`, 80, 780);
-  }
-
-  // 6. Footer Venue & Date
+  // 8. Event Details (Pinterest Luxury Stationery Layout)
+  const detailsY = notchY + 36;
   ctx.textAlign = "center";
+
+  // Date Tag
   ctx.fillStyle = "#D4AF37";
-  ctx.font = "600 14px 'Montserrat', sans-serif";
-  ctx.fillText("SATURDAY, 28 NOVEMBER 2026", 400, 885);
+  ctx.font = "bold 15px 'Montserrat', sans-serif";
+  ctx.fillText("SATURDAY, 28 NOVEMBER 2026", W / 2, detailsY + 22);
 
-  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-  ctx.font = "14px 'Montserrat', sans-serif";
-  ctx.fillText("Crown Palace, Kuzhalmannam, Palakkad", 400, 915);
+  ctx.fillStyle = "#FFF8EB";
+  ctx.font = "600 13px 'Montserrat', sans-serif";
+  ctx.fillText("11:30 AM ONWARDS", W / 2, detailsY + 46);
 
-  ctx.fillStyle = "rgba(212, 175, 55, 0.5)";
-  ctx.font = "11px 'Montserrat', sans-serif";
-  ctx.fillText("thasleema-weds-ashik", 400, 945);
+  ctx.fillStyle = "rgba(255, 248, 235, 0.75)";
+  ctx.font = "15px 'Cormorant Garamond', Georgia, serif";
+  ctx.fillText("Crown Palace • Kuzhalmannam, Palakkad", W / 2, detailsY + 74);
+
+  // 9. Aesthetic VIP Pass Barcode & Verification Footer
+  const footerY = detailsY + 110;
+
+  // Stylized Minimalist Barcode
+  ctx.save();
+  const barcodeX = W / 2 - 130;
+  const barcodeY = footerY;
+  const barcodeW = 260;
+  const barcodeH = 32;
+
+  ctx.fillStyle = "rgba(218, 179, 87, 0.65)";
+  const pattern = [2, 1, 3, 1, 2, 2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 2, 1, 1, 3, 4, 1, 2, 3, 1, 2, 4, 1, 2, 1, 3, 2, 1, 4, 1, 3, 2];
+  let curX = barcodeX;
+  for (let i = 0; i < pattern.length && curX < barcodeX + barcodeW; i++) {
+    const barWidth = pattern[i] ?? 2;
+    if (i % 2 === 0) {
+      ctx.fillRect(curX, barcodeY, barWidth * 1.8, barcodeH);
+    }
+    curX += (barWidth + 2) * 1.8;
+  }
+
+  // Pass Number & Monogram signature
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(218, 179, 87, 0.7)";
+  ctx.font = "10px 'Montserrat', sans-serif";
+  const passSerial = `PASS № TA-2026-${Math.abs((data.name + data.guests).split("").reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0) % 9000 + 1000)}`;
+  ctx.fillText(passSerial, W / 2, barcodeY + barcodeH + 18);
+
+  ctx.fillStyle = "rgba(255, 248, 235, 0.4)";
+  ctx.font = "italic 11px 'Cormorant Garamond', Georgia, serif";
+  ctx.fillText("Show this pass upon arrival • With blessings from family", W / 2, barcodeY + barcodeH + 38);
+  ctx.restore();
 
   return canvas.toDataURL("image/png");
 }
@@ -759,22 +972,13 @@ function MusicPlayer() {
   return <Button size="icon" onClick={toggle} className={`music-button ${playing ? "playing" : ""}`} aria-label={playing ? "Pause ambient music" : "Play ambient music"}>{playing ? <Pause /> : <Music2 />}</Button>;
 }
 
-function Footer({ onOpenNotifications }: { onOpenNotifications?: () => void }) {
+function Footer() {
   return (
     <footer>
       <Ornament />
       <p>Best compliments from</p>
       <h2>Muhammad Ismail</h2>
       <time>28 November 2026</time>
-      <div className="mt-8">
-        <button
-          type="button"
-          onClick={onOpenNotifications}
-          className="text-[11px] text-muted-foreground/60 hover:text-primary transition-colors inline-flex items-center gap-1.5 cursor-pointer bg-transparent border-0"
-        >
-          <Bell className="h-3 w-3" /> Host RSVP Notifications
-        </button>
-      </div>
     </footer>
   );
 }
@@ -911,7 +1115,7 @@ export function WeddingInvitation() {
       <Quote />
       <Gallery />
       <RSVP />
-      <Footer onOpenNotifications={() => setShowNotificationModal(true)} />
+      <Footer />
       <MusicPlayer />
       <HostNotificationModal
         open={showNotificationModal}
